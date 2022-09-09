@@ -1,4 +1,4 @@
-FROM conanio/gcc7:latest
+FROM conanio/gcc9:latest
 
 COPY ./src app
 # Specify the working directory
