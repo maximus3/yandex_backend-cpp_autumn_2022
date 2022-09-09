@@ -33,3 +33,22 @@ install: ##@Code Install dependencies
 	cd src && mkdir .build || echo "Build directory already exists"
 	conan -h || pip3 install conan
 	cd src/.build && conan install .. --build=missing
+
+.PHONY: docker-build
+docker-build: ##@Application Docker build
+	docker-compose build
+
+.PHONY: docker-down
+docker-down: ##@Application Docker down
+	docker-compose down
+
+.PHONY: docker-clean
+docker-clean: ##@Application Docker prune -f
+	docker image prune -f
+
+.PHONY: docker-up-d
+docker-up-d: ##@Application Docker up detach
+	docker-compose up -d
+
+.PHONY: docker
+docker: docker-clean docker-build docker-up-d docker-clean ##@Application Docker prune, up, run and prune
