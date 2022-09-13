@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DISK_REST_API_DATABASE_H
+#define DISK_REST_API_DATABASE_H
 
 #include <memory>
 #include <mutex>
@@ -23,3 +24,5 @@ private:
 
     std::shared_ptr<PGconn>  m_connection;
 };
+
+#endif //DISK_REST_API_DATABASE_H
