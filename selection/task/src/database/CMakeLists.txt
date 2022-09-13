@@ -4,4 +4,4 @@ project(database)
 set(CMAKE_CXX_STANDARD 20)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 
-add_library(database database.h database.cpp database_creator.h databse_creator.cpp)
+add_library(database pg_connection.h pg_connection.cpp pg_backend.h pg_backend.cpp)

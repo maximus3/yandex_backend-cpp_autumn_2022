@@ -1,9 +1,9 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "database.h"
+#include "pg_connection.h"
 
-bool Database::ExecuteSQL(const std::string& sql)
+bool PGConnection::ExecuteSQL(const std::string& sql)
 {
     if (PQstatus(m_connection.get()) != CONNECTION_OK)
     {
@@ -25,7 +25,7 @@ bool Database::ExecuteSQL(const std::string& sql)
     return true;
 }
 
-Database::Database()
+PGConnection::PGConnection()
 {
     LoadEnvVariables();
     m_connection.reset( PQsetdbLogin(m_dbhost.c_str(), std::to_string(m_dbport).c_str(), nullptr, nullptr, m_dbname.c_str(), m_dbuser.c_str(), m_dbpass.c_str()), &PQfinish );
@@ -37,7 +37,7 @@ Database::Database()
 
 }
 
-void Database::LoadEnvVariables()
+void PGConnection::LoadEnvVariables()
 {
     m_dbhost = getenv("DATABASE_HOST");
     m_dbport = atoi(getenv("DATABASE_PORT"));
@@ -47,7 +47,7 @@ void Database::LoadEnvVariables()
 }
 
 
-std::shared_ptr<PGconn> Database::GetConnection() const
+std::shared_ptr<PGconn> PGConnection::GetConnection() const
 {
     return m_connection;
 }

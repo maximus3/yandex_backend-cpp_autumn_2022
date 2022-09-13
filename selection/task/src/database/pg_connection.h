@@ -1,14 +1,14 @@
-#ifndef DISK_REST_API_DATABASE_H
-#define DISK_REST_API_DATABASE_H
+#ifndef DISK_REST_API_PG_CONNECTION_H
+#define DISK_REST_API_PG_CONNECTION_H
 
 #include <memory>
 #include <mutex>
 #include <libpq-fe.h>
 
-class Database
+class PGConnection
 {
 public:
-    Database();
+    PGConnection();
     std::shared_ptr<PGconn> GetConnection() const;
     bool ExecuteSQL(const std::string& sql);
 
@@ -25,4 +25,4 @@ private:
     std::shared_ptr<PGconn>  m_connection;
 };
 
-#endif //DISK_REST_API_DATABASE_H
+#endif //DISK_REST_API_PG_CONNECTION_H
