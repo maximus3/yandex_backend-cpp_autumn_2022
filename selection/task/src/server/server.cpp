@@ -11,62 +11,112 @@
 #include <Poco/URI.h>
 
 #include "server.h"
+#include "../schemas/error_schema.h"
+
+#include "endpoints/nodes.h"
+#include "../database/pg_backend.h"
 
 
 class RequestHandler : public Poco::Net::HTTPRequestHandler
 {
+private:
+    std::shared_ptr<PGBackend> m_PGBackend;
+    std::shared_ptr<PGConnection> m_PGConnection;
 public:
-    void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)
-    {
+    explicit RequestHandler(std::shared_ptr<PGBackend>& a_PGBackend)
+        : Poco::Net::HTTPRequestHandler()
+        , m_PGBackend(a_PGBackend) {}
+
+    void handler(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp) {
         Poco::URI uri(req.getURI());
         std::string method = req.getMethod();
 
         std::cerr << "URI: " << uri.toString() << std::endl;
-        std::cerr << "Method: " << req.getMethod() << std::endl;
+        std::cerr << "Method: " << method << std::endl;
 
         Poco::StringTokenizer tokenizer(uri.getPath(), "/", Poco::StringTokenizer::TOK_TRIM);
         Poco::Net::HTMLForm form(req,req.stream());
 
-        if(!method.compare("POST"))
-        {
-            std::cerr << "POST" << std::endl;
-        }
-        else if(!method.compare("PUT"))
-        {
-            std::cerr << "PUT" << std::endl;
-        }
-        else if(!method.compare("DELETE"))
-        {
-            std::cerr << "DELETE" << std::endl;
+        if (tokenizer.count() < 2) {
+            resp.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
+            resp.send() << schemas::ErrorSchema("Not found", resp.getStatus()).to_json();
+            return;
         }
 
-        resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-        resp.setContentType("application/json");
-        std::ostream& out = resp.send();
+        std::string endpoint = tokenizer[1];
 
-        out << "{hello:heh}" << std::endl;
+        std::cerr << "Endpoint: " << endpoint << std::endl;
 
-        out.flush();
+        if (endpoint == "imports") {
+            if (method == "POST") {
+                resp.setStatus(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
+                resp.send() << schemas::ErrorSchema("TODO", resp.getStatus()).to_json();  // TODO
+                resp.send().flush();
+                return;
+            }
+            resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
+            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
+            resp.send().flush();
+            return;
+        }
+        if (endpoint == "delete") {
+            if (method == "DELETE") {
+                resp.setStatus(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
+                resp.send() << schemas::ErrorSchema("TODO", resp.getStatus()).to_json();  // TODO
+                resp.send().flush();
+                return;
+            }
+            resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
+            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
+            resp.send().flush();
+            return;
+        }
+        if (endpoint == "nodes") {
+            if (method == "GET") {
+                return endpoints::handle_nodes(req, resp, tokenizer);
+            }
+            resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
+            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
+            resp.send().flush();
+            return;
+        }
+        resp.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
+        resp.send() << schemas::ErrorSchema("Not found", resp.getStatus()).to_json();
+        resp.send().flush();
     }
+
+    void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp) override {
+        m_PGConnection = m_PGBackend->connection();
+        resp.setContentType("application/json");
+        handler(req, resp);
+        resp.send().flush();
+        m_PGBackend->freeConnection(m_PGConnection);
+   }
 };
 
 class RequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 {
+private:
+    std::shared_ptr<PGBackend> m_PGBackend;
 public:
-    virtual Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest & request)
-    {
-        return new RequestHandler;
+    explicit RequestHandlerFactory(std::shared_ptr<PGBackend>& a_PGBackend)
+        : Poco::Net::HTTPRequestHandlerFactory()
+        , m_PGBackend(a_PGBackend) {}
+    Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest & request) override {
+        return new RequestHandler(m_PGBackend);
     }
 };
 
 int App::main(const std::vector<std::string> &)
 {
-    Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
+    auto* pParams = new Poco::Net::HTTPServerParams;
 
     pParams->setMaxQueued(100);
     pParams->setMaxThreads(16);
 
-    Poco::Net::HTTPServer s(new RequestHandlerFactory, Poco::Net::ServerSocket(8000), pParams);
+    auto pg_backend = std::make_shared<PGBackend>();
+
+    Poco::Net::HTTPServer s(new RequestHandlerFactory(pg_backend), Poco::Net::ServerSocket(8000), pParams);
 
     s.start();
     std::cerr << "Server started" << std::endl;

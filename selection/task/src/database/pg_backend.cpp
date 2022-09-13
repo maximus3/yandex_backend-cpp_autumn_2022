@@ -2,15 +2,14 @@
 #include <thread>
 #include <fstream>
 #include <sstream>
+
 #include "pg_backend.h"
 
-PGBackend::PGBackend()
-{
+PGBackend::PGBackend() {
     createPool();
 }
 
-void PGBackend::createPool()
-{
+void PGBackend::createPool() {
     std::lock_guard<std::mutex> locker_( m_mutex );
 
     for ( auto i = 0; i< POOL; ++i ){
@@ -18,12 +17,11 @@ void PGBackend::createPool()
     }
 }
 
-std::shared_ptr<PGConnection> PGBackend::connection()
-{
+std::shared_ptr<PGConnection> PGBackend::connection() {
 
     std::unique_lock<std::mutex> lock_( m_mutex );
 
-    while ( m_pool.empty() ){
+    while ( m_pool.empty() ) {
         m_condition.wait( lock_ );
     }
 
@@ -34,8 +32,7 @@ std::shared_ptr<PGConnection> PGBackend::connection()
 }
 
 
-void PGBackend::freeConnection(std::shared_ptr<PGConnection> conn_)
-{
+void PGBackend::freeConnection(std::shared_ptr<PGConnection> conn_) {
     std::unique_lock<std::mutex> lock_( m_mutex );
     m_pool.push( conn_ );
     lock_.unlock();

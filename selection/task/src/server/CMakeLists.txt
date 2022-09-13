@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 2.8.12)
 project(server)
 
 set(CMAKE_CXX_STANDARD 20)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 
-add_library(server server.h server.cpp)
+include_directories(endpoints)
+link_directories(endpoints)
+add_subdirectory(endpoints)
+
+add_library(${PROJECT_NAME} server.h server.cpp)
+target_link_libraries(${PROJECT_NAME} endpoints)

@@ -13,7 +13,12 @@ include_directories(server)
 link_directories(server)
 add_subdirectory(server)
 
-add_executable(disk_rest_api main.cpp)
-target_link_libraries(disk_rest_api database)
-target_link_libraries(disk_rest_api server)
-target_link_libraries(disk_rest_api ${CONAN_LIBS})
+include_directories(schemas)
+link_directories(schemas)
+
+add_executable(${PROJECT_NAME} main.cpp)
+
+target_link_libraries(${PROJECT_NAME}
+        server
+        database
+        ${CONAN_LIBS})
