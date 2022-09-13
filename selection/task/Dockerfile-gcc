@@ -1,0 +1,10 @@
+FROM conanio/gcc9:latest
+
+COPY ./src app
+# Specify the working directory
+WORKDIR app
+USER root
+RUN chmod 777 -R /home/conan/app
+USER conan
+RUN mkdir .build
+RUN cd .build && conan install .. -s compiler.libcxx=libstdc++11 --build missing

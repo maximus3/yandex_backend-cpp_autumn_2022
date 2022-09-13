@@ -110,5 +110,11 @@ venv.bak/
 
 # database
 *.db
-pgadmin/*
-pgdata/*
+pgadmin/
+pgdata/
+
+!.build/conanbuildinfo.cmake
+!.build/conanbuildinfo.txt
+!.build/conaninfo.txt
+!.build/conan.lock
+!.build/graph_info.json

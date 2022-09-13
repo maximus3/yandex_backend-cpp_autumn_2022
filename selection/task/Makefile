@@ -28,11 +28,18 @@ env:  ##@Environment Create .env file with variables
 	@cp .env.example .env
 	@echo "SECRET_KEY=$$(openssl rand -hex 32)" >> .env
 
+clean: ##@Build Clean build files
+	@rm -f .build
+
 .PHONY: install
 install: ##@Code Install dependencies
 	cd src && mkdir .build || echo "Build directory already exists"
 	conan -h || pip3 install conan
 	cd src/.build && conan install .. --build=missing
+
+.PHONY: db
+db: ##@Database Run database
+	docker-compose up -d --remove-orphans postgres
 
 .PHONY: docker-build
 docker-build: ##@Application Docker build
@@ -48,7 +55,20 @@ docker-clean: ##@Application Docker prune -f
 
 .PHONY: docker-up-d
 docker-up-d: ##@Application Docker up detach
-	docker-compose up -d
+	docker-compose up -d --remove-orphans
 
 .PHONY: docker
 docker: docker-clean docker-build docker-up-d docker-clean ##@Application Docker prune, up, run and prune
+
+.PHONY: docker-gcc
+docker-gcc: ##@Build Create docker container with gcc
+	docker build -t gcc_image -f Dockerfile-gcc .
+
+.PHONE: docker-gcc-shell
+docker-gcc-shell: ##@Build Open docker container for clion
+	make docker-gcc
+	docker run -it --rm --entrypoint /bin/bash --name gcc_container gcc_image
+
+.PHONY: docker-gcc-copy
+docker-gcc-copy: ##@Build Copy conan files from docker container to host
+	docker cp gcc_container:/home/conan/app/.build .
