@@ -1,11 +1,11 @@
 #include "server/server.h"
 #include "database/database.h"
-#include "database/test.h"
+#include "database/database_creator.h"
 
 int main(int argc, char** argv)
 {
     //
-    Test::TestDB();
+    DatabaseCreator::Create();
     //
     App app;
 

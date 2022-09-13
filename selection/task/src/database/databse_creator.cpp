@@ -1,7 +1,7 @@
-#include "test.h"
+#include "database_creator.h"
 #include "database.h"
 
-void Test::TestDB()
+void DatabaseCreator::Create()
 {
     Database db;
     db.ExecuteSQL(
@@ -11,7 +11,7 @@ void Test::TestDB()
             "url VARCHAR(255),"
             "date VARCHAR(255) NOT NULL,"
             "dt_date TIMESTAMP NOT NULL,"
-            "parentId VARCHAR(255) REFERENCES system_item (id),"
+            "CONSTRAINT parentId FOREIGN KEY (id) REFERENCES system_item (id) ON DELETE CASCADE,"
             "type VARCHAR(255) NOT NULL,"
             "size BIGINT"
             ");"
