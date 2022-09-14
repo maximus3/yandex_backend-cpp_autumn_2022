@@ -14,8 +14,6 @@ using json = nlohmann::json;
 
 #include "pg_connection.h"
 
-#include "../../schemas/error_schema.h"
-
 namespace endpoints {
 
     void handle_nodes(Poco::Net::HTTPServerRequest& a_Request, Poco::Net::HTTPServerResponse& a_Response, Poco::StringTokenizer& a_Tokenizer, std::shared_ptr<PGConnection> a_PGConnection);

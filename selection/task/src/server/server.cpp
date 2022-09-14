@@ -16,12 +16,12 @@
 #include "json.hpp"
 
 #include "server.h"
-#include "../schemas/error_schema.h"
 
 #include "endpoints/nodes.h"
 #include "endpoints/imports.h"
 #include "endpoints/delete.h"
-#include "../database/pg_backend.h"
+#include "pg_backend.h"
+#include "error_schema.h"
 
 using json = nlohmann::json;
 

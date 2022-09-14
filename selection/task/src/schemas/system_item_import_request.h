@@ -8,6 +8,7 @@
 
 using json = nlohmann::json;
 
+#include "validators.h"
 #include "base_schema.h"
 #include "system_item_import_schema.h"
 
@@ -35,26 +36,7 @@ namespace schemas {
             return j;
         }
 
-        static SystemItemImportRequest from_json(const json& j) {
-            const std::vector<std::string>& available_fields = {
-                    "items",
-                    "updateDate"
-            };
-            validate_fields(j, available_fields);
-
-            auto _items = std::vector<SystemItemImportSchema>();
-            for (const auto &item : j.at("items")) {
-                _items.push_back(SystemItemImportSchema::from_json(item));
-            }
-            auto _updateDate = j.at("updateDate").get<std::string>();
-
-            // TODO: validate
-
-            return {
-                    std::move(_items),
-                    std::move(_updateDate)
-            };
-        }
+        static SystemItemImportRequest from_json(const json& j);
     };
 }
 

@@ -64,7 +64,6 @@ namespace schemas {
 
             std::optional<std::string> _url;
             if (j.contains("url") && !j.at("url").is_null()) {
-                std::cerr << "Have url" << std::endl;
                 _url = j.at("url").get<std::string>();
             } else {
                 _url = std::nullopt;

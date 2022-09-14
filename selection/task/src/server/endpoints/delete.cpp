@@ -1,4 +1,5 @@
 #include "delete.h"
+#include "error_schema.h"
 
 namespace endpoints {
 

@@ -5,20 +5,18 @@ set(CMAKE_CXX_STANDARD 20)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-include_directories(database)
-link_directories(database)
+include_directories(database utils schemas server)
+link_directories(database utils schemas server)
 add_subdirectory(database)
-
-include_directories(server)
-link_directories(server)
+add_subdirectory(utils)
 add_subdirectory(server)
-
-include_directories(schemas)
-link_directories(schemas)
+add_subdirectory(schemas)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
 target_link_libraries(${PROJECT_NAME}
+        schemas
         server
         database
+        utils
         ${CONAN_LIBS})

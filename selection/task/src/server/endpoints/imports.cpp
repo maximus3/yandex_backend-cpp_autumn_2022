@@ -1,5 +1,6 @@
 #include "imports.h"
-#include "../../schemas/system_item_import_request.h"
+#include "system_item_import_request.h"
+#include "error_schema.h"
 
 namespace endpoints {
 
