@@ -42,7 +42,7 @@ async def client(import_batches_data):
 
 
 @pytest.fixture()
-async def prepare_db_shop_unit_env(client, import_batches_data):
+async def prepare_db(client, import_batches_data):
     all_item_ids = set()
     for batch in import_batches_data:
         for item in batch['items']:

@@ -1,7 +1,7 @@
 import datetime as dt
 
-from app.utils import datetime_to_iso_8601, iso_8601_to_datetime
-from tests_data.utils import print_diff, sort_items
+from online_tests.tests_data.utils import datetime_to_iso_8601, iso_8601_to_datetime
+from online_tests.tests_data.utils import print_diff, sort_items
 
 
 async def test_statistics_no_data(client, import_batches_data):

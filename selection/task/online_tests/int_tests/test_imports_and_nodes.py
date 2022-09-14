@@ -1,4 +1,4 @@
-from tests_data.utils import deep_sort_children, print_diff
+from online_tests.tests_data.utils import deep_sort_children, print_diff
 
 
 async def test_change_parents_ok(client, imports_and_nodes_data):
