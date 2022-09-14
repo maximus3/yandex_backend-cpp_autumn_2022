@@ -9,6 +9,10 @@
 #include <Poco/Net/HTMLForm.h>
 #include <Poco/StringTokenizer.h>
 #include <Poco/URI.h>
+#include <Poco/NullStream.h>
+#include <Poco/StreamCopier.h>
+
+#include "json.hpp"
 
 #include "server.h"
 #include "../schemas/error_schema.h"
@@ -17,6 +21,8 @@
 #include "endpoints/imports.h"
 #include "endpoints/delete.h"
 #include "../database/pg_backend.h"
+
+using json = nlohmann::json;
 
 
 class RequestHandler : public Poco::Net::HTTPRequestHandler
@@ -29,7 +35,7 @@ public:
         : Poco::Net::HTTPRequestHandler()
         , m_PGBackend(a_PGBackend) {}
 
-    void handler(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp) {
+    void handler(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp, json& a_JSON) {
         Poco::URI uri(req.getURI());
         std::string method = req.getMethod();
 
@@ -51,7 +57,7 @@ public:
 
         if (endpoint == "imports") {
             if (method == "POST") {
-                return endpoints::handle_imports(req, resp, tokenizer, m_PGConnection);
+                return endpoints::handle_imports(req, resp, a_JSON, tokenizer, m_PGConnection);
             }
             resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
             resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
@@ -60,7 +66,7 @@ public:
         }
         if (endpoint == "delete") {
             if (method == "DELETE") {
-                return endpoints::handle_delete(req, resp, tokenizer, m_PGConnection);
+                return endpoints::handle_delete(req, resp, a_JSON, tokenizer, m_PGConnection);
             }
             resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
             resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
@@ -69,7 +75,7 @@ public:
         }
         if (endpoint == "nodes") {
             if (method == "GET") {
-                return endpoints::handle_nodes(req, resp, tokenizer, m_PGConnection);
+                return endpoints::handle_nodes(req, resp, a_JSON, tokenizer, m_PGConnection);
             }
             resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
             resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
@@ -81,12 +87,39 @@ public:
         resp.send().flush();
     }
 
-    void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp) override {
+    void handleRequest(Poco::Net::HTTPServerRequest& a_Request, Poco::Net::HTTPServerResponse& a_Response) override {
+        a_Response.setContentType("application/json");
+
+        std::string content_type = a_Request.getContentType();
+
+        json json_data;
+        if ( content_type == "application/json" ) {
+            try {
+                json_data = json::parse(a_Request.stream());
+            }
+            catch(json::parse_error& exception) {
+                // Make sure everything is read, otherwise this can result
+                // in Bad Request error in the next call.
+                Poco::NullOutputStream nos;
+                Poco::StreamCopier::copyStream(a_Request.stream(), nos);
+
+                a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+                a_Response.send() << schemas::ErrorSchema(&"JSON error occurred: " [ *exception.what()], a_Response.getStatus()).to_json();
+                a_Response.send().flush();
+                return;
+            }
+        } else {
+            a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+            a_Response.send() << schemas::ErrorSchema("Unsupported content type: " + content_type, a_Response.getStatus()).to_json();
+            a_Response.send().flush();
+            return;
+        }
+
         m_PGConnection = m_PGBackend->connection();
-        resp.setContentType("application/json");
-        handler(req, resp);
-        resp.send().flush();
+        handler(a_Request, a_Response, json_data);
         m_PGBackend->freeConnection(m_PGConnection);
+
+        a_Response.send().flush();
    }
 };
 

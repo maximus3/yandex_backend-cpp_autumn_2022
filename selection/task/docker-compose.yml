@@ -14,8 +14,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    volumes:
-      - ./src:/opt/app
     depends_on:
       - postgres
     restart: unless-stopped

@@ -53,12 +53,16 @@ docker-down: ##@Application Docker down
 docker-clean: ##@Application Docker prune -f
 	docker image prune -f
 
+.PHONY: docker-up
+docker-up: ##@Application Docker up
+	docker-compose up --remove-orphans
+
 .PHONY: docker-up-d
 docker-up-d: ##@Application Docker up detach
 	docker-compose up -d --remove-orphans
 
 .PHONY: docker
-docker: docker-clean docker-build docker-up-d docker-clean ##@Application Docker prune, up, run and prune
+docker: docker-clean docker-build docker-up docker-clean ##@Application Docker prune, up, run and prune
 
 .PHONY: docker-gcc
 docker-gcc: ##@Build Create docker container with gcc

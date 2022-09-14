@@ -7,5 +7,5 @@ include_directories(endpoints)
 link_directories(endpoints)
 add_subdirectory(endpoints)
 
-add_library(${PROJECT_NAME} server.h server.cpp)
+add_library(${PROJECT_NAME} server.h server.cpp json.hpp)
 target_link_libraries(${PROJECT_NAME} endpoints)
