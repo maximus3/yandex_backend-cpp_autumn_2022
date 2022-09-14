@@ -34,8 +34,7 @@ async def test_imports_post_not_iso_8601_text(client):
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
                 }
             ],
@@ -51,8 +50,7 @@ async def test_imports_post_not_iso_8601(client):
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
                 }
             ],
@@ -68,8 +66,7 @@ async def test_imports_post_not_iso_8601_with_dot(client):
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
                 }
             ],
@@ -85,8 +82,7 @@ async def test_imports_post_iso_8601_ok(client):
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
                 }
             ],
@@ -96,15 +92,16 @@ async def test_imports_post_iso_8601_ok(client):
     assert response.status_code == 200, response.json()
 
 
-async def test_imports_post_offer_without_price(client):
+async def test_imports_post_file_without_size(client):
     response = await client.post(
         '/imports',
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар',
+                    'type': 'FILE',
+                    'url': '/file/1',
                     'id': 'id',
+                    'size': 100,
                 }
             ],
             'updateDate': '2022-02-01T12:00:00.000Z',
@@ -113,16 +110,15 @@ async def test_imports_post_offer_without_price(client):
     assert response.status_code == 400
 
 
-async def test_imports_post_category_with_price(client):
+async def test_imports_post_folder_with_size(client):
     response = await client.post(
         '/imports',
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
-                    'price': 100,
+                    'size': 100,
                 }
             ],
             'updateDate': '2022-02-01T12:00:00.000Z',
@@ -131,16 +127,15 @@ async def test_imports_post_category_with_price(client):
     assert response.status_code == 400
 
 
-async def test_imports_post_category_with_price_str(client):
+async def test_imports_post_folder_with_size_str(client):
     response = await client.post(
         '/imports',
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
-                    'price': '100',
+                    'size': '100',
                 }
             ],
             'updateDate': '2022-02-01T12:00:00.000Z',
@@ -149,16 +144,16 @@ async def test_imports_post_category_with_price_str(client):
     assert response.status_code == 400
 
 
-async def test_imports_post_offer_price_neg(client):
+async def test_imports_post_file_size_neg(client):
     response = await client.post(
         '/imports',
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар',
+                    'type': 'FILE',
+                    'url': '/file/1',
                     'id': 'id',
-                    'price': -100,
+                    'size': -100,
                 }
             ],
             'updateDate': '2022-02-01T12:00:00.000Z',
@@ -167,16 +162,34 @@ async def test_imports_post_offer_price_neg(client):
     assert response.status_code == 400
 
 
-async def test_imports_post_offer_price_zero_ok(client):
+async def test_imports_post_file_size_zero_not_ok(client):
     response = await client.post(
         '/imports',
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар',
+                    'type': 'FILE',
+                    'url': '/file/1',
                     'id': 'id',
-                    'price': 0,
+                    'size': 0,
+                }
+            ],
+            'updateDate': '2022-02-01T12:00:00.000Z',
+        },
+    )
+    assert response.status_code == 400, response.json()
+
+
+async def test_imports_post_file_ok(client):
+    response = await client.post(
+        '/imports',
+        json={
+            'items': [
+                {
+                    'type': 'FILE',
+                    'url': '/file/1',
+                    'id': 'id',
+                    'size': 100,
                 }
             ],
             'updateDate': '2022-02-01T12:00:00.000Z',
@@ -185,32 +198,13 @@ async def test_imports_post_offer_price_zero_ok(client):
     assert response.status_code == 200, response.json()
 
 
-async def test_imports_post_offer_ok(client):
+async def test_imports_post_folder_ok(client):
     response = await client.post(
         '/imports',
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар',
-                    'id': 'id',
-                    'price': 100,
-                }
-            ],
-            'updateDate': '2022-02-01T12:00:00.000Z',
-        },
-    )
-    assert response.status_code == 200, response.json()
-
-
-async def test_imports_post_category_ok(client):
-    response = await client.post(
-        '/imports',
-        json={
-            'items': [
-                {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
                 }
             ],
@@ -226,13 +220,11 @@ async def test_imports_post_double_id(client):
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
                 },
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
                 },
             ],
@@ -248,14 +240,14 @@ async def test_imports_post_double_id_diff(client):
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
                 },
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар',
+                    'type': 'FILE',
+                    'url': '/file/1',
                     'id': 'id',
+                    'size': 100,
                 },
             ],
             'updateDate': '2022-02-01T12:00:00.000Z',
@@ -264,14 +256,13 @@ async def test_imports_post_double_id_diff(client):
     assert response.status_code == 400
 
 
-async def test_imports_post_item_type_mismatch_cat_to_offer(client):
+async def test_imports_post_item_type_mismatch_cat_to_file(client):
     response = await client.post(
         '/imports',
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
                 }
             ],
@@ -285,10 +276,10 @@ async def test_imports_post_item_type_mismatch_cat_to_offer(client):
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Категория',
+                    'type': 'FILE',
+                    'url': '/file/1',
                     'id': 'id',
-                    'price': 100,
+                    'size': 100,
                 }
             ],
             'updateDate': '2022-02-01T12:00:00.000Z',
@@ -297,16 +288,16 @@ async def test_imports_post_item_type_mismatch_cat_to_offer(client):
     assert response.status_code == 400
 
 
-async def test_imports_post_item_type_mismatch_offer_to_cat(client):
+async def test_imports_post_item_type_mismatch_file_to_cat(client):
     response = await client.post(
         '/imports',
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар',
+                    'type': 'FILE',
+                    'url': '/file/1',
                     'id': 'id',
-                    'price': 100,
+                    'size': 100,
                 }
             ],
             'updateDate': '2022-02-01T12:00:00.000Z',
@@ -319,8 +310,7 @@ async def test_imports_post_item_type_mismatch_offer_to_cat(client):
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id',
                 }
             ],
@@ -336,10 +326,10 @@ async def test_imports_post_item_type_no_mismatch(client):
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар',
+                    'type': 'FILE',
+                    'url': '/file/1',
                     'id': 'id',
-                    'price': 100,
+                    'size': 100,
                 }
             ],
             'updateDate': '2022-02-01T12:00:00.000Z',
@@ -352,10 +342,10 @@ async def test_imports_post_item_type_no_mismatch(client):
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар 2',
+                    'type': 'FILE',
+                    'url': '/file/2',
                     'id': 'id',
-                    'price': 150,
+                    'size': 150,
                 }
             ],
             'updateDate': '2022-02-01T12:00:00.000Z',
@@ -364,16 +354,16 @@ async def test_imports_post_item_type_no_mismatch(client):
     assert response.status_code == 200, response.json()
 
 
-async def test_imports_post_parent_no_category(client):
+async def test_imports_post_parent_no_folder(client):
     response = await client.post(
         '/imports',
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар',
+                    'type': 'FILE',
+                    'url': '/file/1',
                     'id': 'id1',
-                    'price': 100,
+                    'size': 100,
                 }
             ],
             'updateDate': '2022-02-01T12:00:00.000Z',
@@ -386,10 +376,10 @@ async def test_imports_post_parent_no_category(client):
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар 2',
+                    'type': 'FILE',
+                    'url': '/file/2',
                     'id': 'id2',
-                    'price': 150,
+                    'size': 150,
                     'parentId': 'id1',
                 }
             ],
@@ -399,27 +389,26 @@ async def test_imports_post_parent_no_category(client):
     assert response.status_code == 400
 
 
-async def test_imports_post_parent_no_category_update(client):
+async def test_imports_post_parent_no_folder_update(client):
     response = await client.post(
         '/imports',
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id_cat',
                 },
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар',
+                    'type': 'FILE',
+                    'url': '/file/1',
                     'id': 'id1',
-                    'price': 100,
+                    'size': 100,
                 },
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар 2',
+                    'type': 'FILE',
+                    'url': '/file/2',
                     'id': 'id200',
-                    'price': 200,
+                    'size': 200,
                     'parentId': 'id_cat',
                 },
             ],
@@ -433,10 +422,10 @@ async def test_imports_post_parent_no_category_update(client):
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар 2',
+                    'type': 'FILE',
+                    'url': '/file/2',
                     'id': 'id200',
-                    'price': 200,
+                    'size': 200,
                     'parentId': 'id1',
                 }
             ],
@@ -452,8 +441,7 @@ async def test_imports_post_parent_ok(client):
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id1',
                 }
             ],
@@ -467,10 +455,10 @@ async def test_imports_post_parent_ok(client):
         json={
             'items': [
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар',
+                    'type': 'FILE',
+                    'url': '/file/1',
                     'id': 'id2',
-                    'price': 150,
+                    'size': 150,
                     'parentId': 'id1',
                 }
             ],
@@ -486,13 +474,12 @@ async def test_imports_post_error_in_last(client):
         json={
             'items': [
                 {
-                    'type': 'CATEGORY',
-                    'name': 'Категория',
+                    'type': 'FOLDER',
                     'id': 'id1',
                 },
                 {
-                    'type': 'OFFER',
-                    'name': 'Товар неправильный',
+                    'type': 'FILE',
+                    'url': '/file/wrong',
                     'id': 'id2',
                 },
             ],
