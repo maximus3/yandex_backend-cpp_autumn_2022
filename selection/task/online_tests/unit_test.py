@@ -182,9 +182,9 @@ def request(path, method="GET", data=None, json_response=False):
             res_data = res.read().decode("utf-8")
             if json_response:
                 res_data = json.loads(res_data)
-            return (res.getcode(), res_data)
+            return res.getcode(), res_data
     except urllib.error.HTTPError as e:
-        return (e.getcode(), None)
+        return e.getcode(), e.read().decode("utf-8")
 
 
 def deep_sort_children(node):
@@ -209,6 +209,7 @@ def print_diff(expected, response):
 
 
 def test_import():
+    print("test_import")
     for index, batch in enumerate(IMPORT_BATCHES):
         print(f"Importing batch {index}")
         status, response = request("/imports", method="POST", data=batch)
@@ -219,6 +220,7 @@ def test_import():
 
 
 def test_nodes():
+    print("test_nodes")
     status, response = request(f"/nodes/{ROOT_ID}", json_response=True)
     # print(json.dumps(response, indent=2, ensure_ascii=False))
 
@@ -235,6 +237,7 @@ def test_nodes():
 
 
 def test_updates():
+    print("test_updates")
     params = urllib.parse.urlencode({
         "date": "2022-02-04T00:00:00Z"
     })
@@ -244,6 +247,7 @@ def test_updates():
 
 
 def test_history():
+    print("test_history")
     params = urllib.parse.urlencode({
         "dateStart": "2022-02-01T00:00:00Z",
         "dateEnd": "2022-02-03T00:00:00Z"
@@ -255,6 +259,7 @@ def test_history():
 
 
 def test_delete():
+    print("test_delete")
     params = urllib.parse.urlencode({
         "date": "2022-02-04T00:00:00Z"
     })

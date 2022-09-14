@@ -62,7 +62,7 @@ docker-up-d: ##@Application Docker up detach
 	docker-compose up -d --remove-orphans
 
 .PHONY: docker
-docker: docker-clean docker-build docker-up docker-clean ##@Application Docker prune, up, run and prune
+docker: docker-clean docker-build docker-up-d docker-clean ##@Application Docker prune, up, run and prune
 
 .PHONY: docker-gcc
 docker-gcc: ##@Build Create docker container with gcc
@@ -78,6 +78,6 @@ docker-gcc-copy: ##@Build Copy conan files from docker container to host
 	docker cp gcc_container:/home/conan/app/.build .
 
 .PHONY: test
-online-test: ##@Testing  Runs online tests
+test: ##@Testing  Runs online tests
 	python -m online_tests
 	pytest online_tests --verbosity=2 --showlocals --log-level=DEBUG --no-cov

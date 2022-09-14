@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <optional>
 
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPRequestHandler.h>
@@ -35,19 +36,19 @@ public:
         : Poco::Net::HTTPRequestHandler()
         , m_PGBackend(a_PGBackend) {}
 
-    void handler(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp, json& a_JSON) {
-        Poco::URI uri(req.getURI());
-        std::string method = req.getMethod();
+    void handler(Poco::Net::HTTPServerRequest &a_Request, Poco::Net::HTTPServerResponse &a_Response, std::optional<json>& a_JSON) {
+        Poco::URI uri(a_Request.getURI());
+        std::string method = a_Request.getMethod();
 
         std::cerr << "URI: " << uri.toString() << std::endl;
         std::cerr << "Method: " << method << std::endl;
 
         Poco::StringTokenizer tokenizer(uri.getPath(), "/", Poco::StringTokenizer::TOK_TRIM);
-        Poco::Net::HTMLForm form(req,req.stream());
+        Poco::Net::HTMLForm form(a_Request, a_Request.stream());
 
         if (tokenizer.count() < 2) {
-            resp.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
-            resp.send() << schemas::ErrorSchema("Not found", resp.getStatus());
+            a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
+            a_Response.send() << schemas::ErrorSchema("Not found", a_Response.getStatus());
             return;
         }
 
@@ -57,34 +58,41 @@ public:
 
         if (endpoint == "imports") {
             if (method == "POST") {
-                return endpoints::handle_imports(req, resp, a_JSON, tokenizer, m_PGConnection);
+                if (a_JSON.has_value()) {
+                    return endpoints::handle_imports(a_Request, a_Response, a_JSON.value(), tokenizer, m_PGConnection);
+                } else {
+                    a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+                    a_Response.send() << schemas::ErrorSchema("No JSON data", a_Response.getStatus());
+                    a_Response.send().flush();
+                    return;
+                }
             }
-            resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
-            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus());
-            resp.send().flush();
+            a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
+            a_Response.send() << schemas::ErrorSchema("Method not allowed", a_Response.getStatus());
+            a_Response.send().flush();
             return;
         }
         if (endpoint == "delete") {
             if (method == "DELETE") {
-                return endpoints::handle_delete(req, resp, a_JSON, tokenizer, m_PGConnection);
+                return endpoints::handle_delete(a_Request, a_Response, tokenizer, m_PGConnection);
             }
-            resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
-            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus());
-            resp.send().flush();
+            a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
+            a_Response.send() << schemas::ErrorSchema("Method not allowed", a_Response.getStatus());
+            a_Response.send().flush();
             return;
         }
         if (endpoint == "nodes") {
             if (method == "GET") {
-                return endpoints::handle_nodes(req, resp, a_JSON, tokenizer, m_PGConnection);
+                return endpoints::handle_nodes(a_Request, a_Response, tokenizer, m_PGConnection);
             }
-            resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
-            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus());
-            resp.send().flush();
+            a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
+            a_Response.send() << schemas::ErrorSchema("Method not allowed", a_Response.getStatus());
+            a_Response.send().flush();
             return;
         }
-        resp.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
-        resp.send() << schemas::ErrorSchema("Not found", resp.getStatus());
-        resp.send().flush();
+        a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
+        a_Response.send() << schemas::ErrorSchema("Not found", a_Response.getStatus());
+        a_Response.send().flush();
     }
 
     void handleRequest(Poco::Net::HTTPServerRequest& a_Request, Poco::Net::HTTPServerResponse& a_Response) override {
@@ -92,7 +100,7 @@ public:
 
         std::string content_type = a_Request.getContentType();
 
-        json json_data;
+        std::optional<json> json_data;
         if ( content_type == "application/json" ) {
             try {
                 json_data = json::parse(a_Request.stream());
@@ -108,11 +116,6 @@ public:
                 a_Response.send().flush();
                 return;
             }
-        } else {
-            a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
-            a_Response.send() << schemas::ErrorSchema("Unsupported content type: " + content_type, a_Response.getStatus());
-            a_Response.send().flush();
-            return;
         }
 
         m_PGConnection = m_PGBackend->connection();

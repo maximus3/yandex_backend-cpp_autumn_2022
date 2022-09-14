@@ -2,7 +2,6 @@
 #define DISK_REST_API_SCHEMAS_SYSTEM_ITEM_IMPORT_REQUEST_H
 
 #include <string>
-#include <optional>
 #include <vector>
 
 #include "json.hpp"

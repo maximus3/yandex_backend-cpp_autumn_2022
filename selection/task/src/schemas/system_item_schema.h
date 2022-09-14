@@ -39,7 +39,7 @@ namespace schemas {
                 , date(std::move(date))
                 , parentId(std::move(parentId))
                 , type(type)
-                , size(std::move(size))
+                , size(size)
                 , children(std::move(children)) {}
 
         json to_json() const override  {
@@ -80,7 +80,7 @@ namespace schemas {
             auto _id = j.at("id").get<std::string>();
 
             std::optional<std::string> _url;
-            if (j.contains("url")) {
+            if (j.contains("url") && !j.at("url").is_null()) {
                 _url = j.at("url").get<std::string>();
             } else {
                 _url = std::nullopt;
@@ -89,23 +89,23 @@ namespace schemas {
             auto _date = j.at("date").get<std::string>();
 
             std::optional<std::string> _parentId;
-            if (j.contains("parentId")) {
+            if (j.contains("parentId") && !j.at("parentId").is_null()) {
                 _parentId = j.at("parentId").get<std::string>();
             } else {
                 _parentId = std::nullopt;
             }
 
-            auto _type = j.at("type").get<SystemItemType>();
+            auto _type = to_system_item(j.at("type").get<std::string>());
 
             std::optional<int64_t> _size;
-            if (j.contains("size")) {
+            if (j.contains("size") && !j.at("size").is_null()) {
                 _size = j.at("size").get<int64_t>();
             } else {
                 _size = std::nullopt;
             }
 
             std::optional<std::vector<SystemItemSchema>> _children;
-            if (j.contains("children")) {
+            if (j.contains("children") && !j.at("children").is_null()) {
                 _children = std::vector<SystemItemSchema>();
                 for (auto& child : j.at("children")) {
                     _children->push_back(SystemItemSchema::from_json(child));

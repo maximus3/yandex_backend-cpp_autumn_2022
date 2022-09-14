@@ -13,11 +13,16 @@ namespace endpoints {
             a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
             a_Response.send() << schemas::ErrorSchema(e.what(), a_Response.getStatus());
             return;
+        } catch (json::type_error & e) {
+            a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+            a_Response.send() << schemas::ErrorSchema(e.what(), a_Response.getStatus());
+            return;
         } catch (std::invalid_argument& e) {
             a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
             a_Response.send() << schemas::ErrorSchema(e.what(), a_Response.getStatus());
             return;
         } catch (std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
             a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
             a_Response.send() << schemas::ErrorSchema(e.what(), a_Response.getStatus());
             return;
