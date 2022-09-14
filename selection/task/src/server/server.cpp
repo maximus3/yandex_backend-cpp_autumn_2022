@@ -14,6 +14,8 @@
 #include "../schemas/error_schema.h"
 
 #include "endpoints/nodes.h"
+#include "endpoints/imports.h"
+#include "endpoints/delete.h"
 #include "../database/pg_backend.h"
 
 
@@ -49,10 +51,7 @@ public:
 
         if (endpoint == "imports") {
             if (method == "POST") {
-                resp.setStatus(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
-                resp.send() << schemas::ErrorSchema("TODO", resp.getStatus()).to_json();  // TODO
-                resp.send().flush();
-                return;
+                return endpoints::handle_imports(req, resp, tokenizer, m_PGConnection);
             }
             resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
             resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
@@ -61,10 +60,7 @@ public:
         }
         if (endpoint == "delete") {
             if (method == "DELETE") {
-                resp.setStatus(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
-                resp.send() << schemas::ErrorSchema("TODO", resp.getStatus()).to_json();  // TODO
-                resp.send().flush();
-                return;
+                return endpoints::handle_delete(req, resp, tokenizer, m_PGConnection);
             }
             resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
             resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
@@ -73,7 +69,7 @@ public:
         }
         if (endpoint == "nodes") {
             if (method == "GET") {
-                return endpoints::handle_nodes(req, resp, tokenizer);
+                return endpoints::handle_nodes(req, resp, tokenizer, m_PGConnection);
             }
             resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
             resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
