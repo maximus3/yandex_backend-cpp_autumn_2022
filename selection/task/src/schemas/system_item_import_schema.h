@@ -14,8 +14,6 @@ using json = nlohmann::json;
 namespace schemas {
 
     class SystemItemImportSchema : public BaseSchema {
-    private:
-        static std::vector<std::string> m_AvailableFields;
     public:
         const std::string id;
         const std::optional <std::string> url;
@@ -53,14 +51,14 @@ namespace schemas {
         }
 
         static SystemItemImportSchema from_json(const json& j) {
-            m_AvailableFields = {
+            const std::vector<std::string>& available_fields = {
                     "id",
                     "url",
                     "parentId",
                     "type",
                     "size"
             };
-            validate_fields(j);
+            validate_fields(j, available_fields);
 
             auto _id = j.at("id").get<std::string>();
 

@@ -15,8 +15,6 @@ using json = nlohmann::json;
 namespace schemas {
 
     class SystemItemImportRequest : public BaseSchema {
-    private:
-        static std::vector<std::string> m_AvailableFields;
     public:
         const std::vector<SystemItemImportSchema> items;
         const std::string updateDate;
@@ -39,11 +37,11 @@ namespace schemas {
         }
 
         static SystemItemImportRequest from_json(const json& j) {
-            m_AvailableFields = {
+            const std::vector<std::string>& available_fields = {
                     "items",
                     "updateDate"
             };
-            validate_fields(j);
+            validate_fields(j, available_fields);
 
             auto _items = std::vector<SystemItemImportSchema>();
             for (const auto &item : j.at("items")) {

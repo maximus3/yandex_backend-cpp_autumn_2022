@@ -12,8 +12,6 @@ using json = nlohmann::json;
 namespace schemas {
 
     class ErrorSchema : public BaseSchema {
-    private:
-        static std::vector<std::string> m_AvailableFields;
     public:
         const std::string message;
         const int code;
@@ -28,8 +26,8 @@ namespace schemas {
         }
 
         static ErrorSchema from_json(const json &j) {
-            m_AvailableFields = {"message", "code"};
-            validate_fields(j);
+            const std::vector<std::string>& available_fields = {"message", "code"};
+            validate_fields(j, available_fields);
             return {
                     j.at("message").get<std::string>(),
                     j.at("code").get<int>()

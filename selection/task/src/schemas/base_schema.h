@@ -10,8 +10,6 @@ namespace schemas
 {
     class BaseSchema
     {
-    private:
-        static std::vector<std::string> m_AvailableFields;
     public:
         BaseSchema() = default;
         virtual json to_json() const = 0;
@@ -20,10 +18,10 @@ namespace schemas
             return to_json().dump();
         }
 
-        static void validate_fields(const json& j) {
+        static void validate_fields(const json& j, const std::vector<std::string>& a_AvailableFields) {
             for (auto& [key, value] : j.items()) {
-                if (std::find(m_AvailableFields.begin(), m_AvailableFields.end(), key) == m_AvailableFields.end()) {
-                    throw std::invalid_argument("Unknown field: " + key);
+                if (std::find(a_AvailableFields.begin(), a_AvailableFields.end(), key) == a_AvailableFields.end()) {
+                    throw std::invalid_argument("key '" + key + "' not found in schema");
                 }
             }
         }
