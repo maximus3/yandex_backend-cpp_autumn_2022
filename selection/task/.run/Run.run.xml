@@ -12,6 +12,8 @@
     <option name="EXECUTE_IN_TERMINAL" value="true" />
     <option name="EXECUTE_SCRIPT_FILE" value="false" />
     <envs />
-    <method v="2" />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="disk_rest_api" run_configuration_type="CMakeRunConfiguration" run_configuration_target="CMakeBuildProfile:Debug-Docker" />
+    </method>
   </configuration>
 </component>

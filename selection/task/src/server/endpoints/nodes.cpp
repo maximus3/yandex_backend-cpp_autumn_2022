@@ -6,7 +6,7 @@ namespace endpoints {
         //Poco::Net::HTMLForm form(req,req.stream());
 
         resp.setStatus(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
-        resp.send() << schemas::ErrorSchema("TODO", resp.getStatus()).to_json();  // TODO
+        resp.send() << schemas::ErrorSchema("TODO nodes", resp.getStatus()).to_json();  // TODO
     }
 
 } // namespace endpoints

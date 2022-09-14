@@ -3,4 +3,4 @@ project(endpoints)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_library(${PROJECT_NAME} nodes.h nodes.cpp)
+add_library(${PROJECT_NAME} nodes.h nodes.cpp imports.cpp imports.h delete.cpp delete.h)
