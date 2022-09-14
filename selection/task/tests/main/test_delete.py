@@ -1,3 +1,7 @@
+import pytest
+
+pytestmark = pytest.mark.asyncio
+
 async def test_delete_not_found(client, import_batches_data):
     response = await client.delete(
         f'/delete/{import_batches_data[0]["items"][0]["id"]}'

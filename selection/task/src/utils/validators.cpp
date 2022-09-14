@@ -14,4 +14,19 @@ namespace utils::validators {
         }
     }
 
+    void validate_size(const std::optional<int64_t>& a_Size, const schemas::SystemItemType& a_Type) {
+        if (a_Type == schemas::SystemItemType::FILE) {
+            if (!a_Size.has_value()) {
+                throw std::invalid_argument("Size must be specified for files");
+            }
+            if (a_Size.value() <= 0) {
+                throw std::invalid_argument("Size must be greater than 0");
+            }
+        } else {
+            if (a_Size.has_value()) {
+                throw std::invalid_argument("Size must not be specified for directories");
+            }
+        }
+    }
+
 }

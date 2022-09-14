@@ -54,8 +54,6 @@ public:
 
         std::string endpoint = tokenizer[1];
 
-        std::cerr << "Endpoint: " << endpoint << std::endl;
-
         if (endpoint == "imports") {
             if (method == "POST") {
                 if (a_JSON.has_value()) {

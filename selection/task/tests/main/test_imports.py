@@ -1,11 +1,16 @@
+import pytest
+
+pytestmark = pytest.mark.asyncio
+
+
 async def test_imports_post_validation_error(client):
     response = await client.post('/imports')
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_validation_error_with_json(client):
     response = await client.post('/imports', json={'aaa': 'bbb'})
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def check_import_ok(web_client, batches):
@@ -23,7 +28,7 @@ async def test_imports_post_ok(client, import_batches_data):
 
 
 async def test_imports_post_ok_if_exists(
-    prepare_db_shop_unit_env, client, import_batches_data
+        prepare_db, client, import_batches_data
 ):
     await check_import_ok(client, import_batches_data)
 
@@ -41,7 +46,7 @@ async def test_imports_post_not_iso_8601_text(client):
             'updateDate': 'aaa',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_not_iso_8601(client):
@@ -57,7 +62,7 @@ async def test_imports_post_not_iso_8601(client):
             'updateDate': '2022-02-32T12:00:00',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_not_iso_8601_with_dot(client):
@@ -73,7 +78,7 @@ async def test_imports_post_not_iso_8601_with_dot(client):
             'updateDate': '2022-02-32T12:00:00.000',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_iso_8601_ok(client):
@@ -107,7 +112,7 @@ async def test_imports_post_file_without_size(client):
             'updateDate': '2022-02-01T12:00:00.000Z',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_folder_with_size(client):
@@ -124,7 +129,7 @@ async def test_imports_post_folder_with_size(client):
             'updateDate': '2022-02-01T12:00:00.000Z',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_folder_with_size_str(client):
@@ -141,7 +146,7 @@ async def test_imports_post_folder_with_size_str(client):
             'updateDate': '2022-02-01T12:00:00.000Z',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_file_size_neg(client):
@@ -159,7 +164,7 @@ async def test_imports_post_file_size_neg(client):
             'updateDate': '2022-02-01T12:00:00.000Z',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_file_size_zero_not_ok(client):
@@ -231,7 +236,7 @@ async def test_imports_post_double_id(client):
             'updateDate': '2022-02-01T12:00:00.000Z',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_double_id_diff(client):
@@ -253,7 +258,7 @@ async def test_imports_post_double_id_diff(client):
             'updateDate': '2022-02-01T12:00:00.000Z',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_item_type_mismatch_cat_to_file(client):
@@ -285,7 +290,7 @@ async def test_imports_post_item_type_mismatch_cat_to_file(client):
             'updateDate': '2022-02-01T12:00:00.000Z',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_item_type_mismatch_file_to_cat(client):
@@ -317,7 +322,7 @@ async def test_imports_post_item_type_mismatch_file_to_cat(client):
             'updateDate': '2022-02-01T12:00:00.000Z',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_item_type_no_mismatch(client):
@@ -386,7 +391,7 @@ async def test_imports_post_parent_no_folder(client):
             'updateDate': '2022-02-01T12:00:00.000Z',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_parent_no_folder_update(client):
@@ -432,7 +437,7 @@ async def test_imports_post_parent_no_folder_update(client):
             'updateDate': '2022-02-01T12:00:00.000Z',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
 
 async def test_imports_post_parent_ok(client):
@@ -486,7 +491,7 @@ async def test_imports_post_error_in_last(client):
             'updateDate': '2022-02-01T12:00:00.000Z',
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 400, response.json()
 
     response = await client.get('/nodes/id1')
     assert response.status_code == 404, response.json()

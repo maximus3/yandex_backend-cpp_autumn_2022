@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME}
         error_schema.h
         system_item_type.h
         system_item_schema.h
-        system_item_import_schema.h
-        system_item_import_request.h system_item_import_request.cpp)
+        system_item_import_schema.h system_item_import_schema.cpp
+        system_item_import_request.h system_item_import_request.cpp
+        )
 target_link_libraries(${PROJECT_NAME} utils)

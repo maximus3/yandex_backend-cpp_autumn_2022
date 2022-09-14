@@ -1,4 +1,4 @@
-from online_tests.unit_test import IMPORT_BATCHES, EXPECTED_TREE
+from tests.unit_test import IMPORT_BATCHES, EXPECTED_TREE
 
 EXPECTED_STATISTIC = {
     'items': [

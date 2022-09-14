@@ -1,3 +1,7 @@
+import pytest
+
+pytestmark = pytest.mark.asyncio
+
 async def test_sales_no_date(client):
     response = await client.get(f'/sales')
     assert response.status_code == 400

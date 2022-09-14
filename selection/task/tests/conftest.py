@@ -1,14 +1,28 @@
+from asyncio import new_event_loop, set_event_loop
+
 import pytest
 from httpx import AsyncClient
 
-from online_tests import API_BASEURL
-from online_tests.tests_data.static import (
+from tests import API_BASEURL
+from tests.tests_data.static import (
     EXPECTED_STATISTIC,
     EXPECTED_TREE,
     IMPORT_BATCHES,
     IMPORTS_AND_NODES_DATA,
 )
-from online_tests.tests_data.utils import clear_used_ids
+from tests.tests_data.utils import clear_used_ids
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """
+    Creates event loop for tests.
+    """
+    loop = new_event_loop()
+    set_event_loop(loop)
+
+    yield loop
+    loop.close()
 
 
 @pytest.fixture()
@@ -24,6 +38,7 @@ async def client(import_batches_data):
             all_item_ids.add(item['id'])
     async with AsyncClient(base_url=API_BASEURL) as client:
         yield client
+
         await clear_used_ids(client, all_item_ids)
         await clear_used_ids(
             client,

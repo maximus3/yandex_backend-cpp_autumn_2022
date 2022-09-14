@@ -1,6 +1,10 @@
+import pytest
+
+pytestmark = pytest.mark.asyncio
+
 import datetime as dt
 
-from online_tests.tests_data.utils import datetime_to_iso_8601, iso_8601_to_datetime
+from tests.tests_data.utils import datetime_to_iso_8601, iso_8601_to_datetime
 
 
 async def test_statistic_get_deleted_and_children_in_response(

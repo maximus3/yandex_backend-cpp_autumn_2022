@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "DISK REST API"
+version = "0.1.0"
+description = "Disk rest api"
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.0"
+pytest-mock = "^3.7.0"
+httpx = "^0.23.0"
+pytest-asyncio = "^0.19.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
