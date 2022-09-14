@@ -47,7 +47,7 @@ public:
 
         if (tokenizer.count() < 2) {
             resp.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
-            resp.send() << schemas::ErrorSchema("Not found", resp.getStatus()).to_json();
+            resp.send() << schemas::ErrorSchema("Not found", resp.getStatus());
             return;
         }
 
@@ -60,7 +60,7 @@ public:
                 return endpoints::handle_imports(req, resp, a_JSON, tokenizer, m_PGConnection);
             }
             resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
-            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
+            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus());
             resp.send().flush();
             return;
         }
@@ -69,7 +69,7 @@ public:
                 return endpoints::handle_delete(req, resp, a_JSON, tokenizer, m_PGConnection);
             }
             resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
-            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
+            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus());
             resp.send().flush();
             return;
         }
@@ -78,12 +78,12 @@ public:
                 return endpoints::handle_nodes(req, resp, a_JSON, tokenizer, m_PGConnection);
             }
             resp.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
-            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus()).to_json();
+            resp.send() << schemas::ErrorSchema("Method not allowed", resp.getStatus());
             resp.send().flush();
             return;
         }
         resp.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
-        resp.send() << schemas::ErrorSchema("Not found", resp.getStatus()).to_json();
+        resp.send() << schemas::ErrorSchema("Not found", resp.getStatus());
         resp.send().flush();
     }
 
@@ -104,13 +104,13 @@ public:
                 Poco::StreamCopier::copyStream(a_Request.stream(), nos);
 
                 a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
-                a_Response.send() << schemas::ErrorSchema(&"JSON error occurred: " [ *exception.what()], a_Response.getStatus()).to_json();
+                a_Response.send() << schemas::ErrorSchema(&"JSON error occurred: " [ *exception.what()], a_Response.getStatus());
                 a_Response.send().flush();
                 return;
             }
         } else {
             a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
-            a_Response.send() << schemas::ErrorSchema("Unsupported content type: " + content_type, a_Response.getStatus()).to_json();
+            a_Response.send() << schemas::ErrorSchema("Unsupported content type: " + content_type, a_Response.getStatus());
             a_Response.send().flush();
             return;
         }

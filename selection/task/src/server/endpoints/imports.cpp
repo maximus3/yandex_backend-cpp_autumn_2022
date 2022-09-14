@@ -11,7 +11,7 @@ namespace endpoints {
         std::cerr << a_JSON.at("lol") << std::endl;
 
         a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_CONFLICT);
-        a_Response.send() << schemas::ErrorSchema("TODO imports", a_Response.getStatus()).to_json();  // TODO
+        a_Response.send() << schemas::ErrorSchema("TODO imports", a_Response.getStatus());  // TODO
     }
 
 } // namespace endpoints
