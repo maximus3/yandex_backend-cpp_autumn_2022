@@ -3,4 +3,10 @@ project(schemas)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_library(${PROJECT_NAME} base_schema.h error_schema.h)
+add_library(${PROJECT_NAME}
+        base_schema.h
+        error_schema.h
+        system_item_type.h
+        system_item_schema.h
+        system_item_import_schema.h
+        system_item_import_request.h)
