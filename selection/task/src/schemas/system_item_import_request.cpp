@@ -37,13 +37,14 @@ namespace schemas {
 
         for (const auto &item: items) {
             PGresult *res = nullptr;
-            int nParams = 5;
+            int nParams = 6;
 
-            std:: string sql = R"(INSERT INTO system_item (id, url, date, dt_date, type, size) VALUES ( $1::VARCHAR, CASE WHEN $2='' THEN NULL ELSE $2::VARCHAR END, $3::VARCHAR, TO_TIMESTAMP($3, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), $4::VARCHAR, CASE WHEN $5='' THEN NULL ELSE $5::BIGINT END );)";
+            std:: string sql = R"(INSERT INTO system_item (id, url, date, dt_date, parentId, type, size) VALUES ( $1::VARCHAR, CASE WHEN $2='' THEN NULL ELSE $2::VARCHAR END, $3::VARCHAR, TO_TIMESTAMP($3, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), CASE WHEN $4='' THEN NULL ELSE $4 END, $5::VARCHAR, CASE WHEN $6='' THEN NULL ELSE $6::BIGINT END );)";
             const char* paramValues[] = {
                     item.id.c_str(),
                     item.url.has_value() ? item.url.value().c_str() : "",
                     updateDate.c_str(),
+                    item.parentId.has_value() ? item.parentId.value().c_str() : "",
                     schemas::to_string(item.type).c_str(),
                     item.size.has_value() ? std::to_string(item.size.value()).c_str() : ""
             };
@@ -53,9 +54,10 @@ namespace schemas {
                     sizeof(paramValues[1],
                     sizeof(paramValues[2]),
                     sizeof(paramValues[3]),
-                    sizeof(paramValues[4])
+                    sizeof(paramValues[4]),
+                    sizeof(paramValues[5])
             )};
-            const int paramFormats[] = {0, 0, 0, 0, 0};
+            const int paramFormats[] = {0, 0, 0, 0, 0, 0};
             int resultFormat = 0;
             res = PQexecParams(
                     a_PGConnection->GetConnection().get(),
