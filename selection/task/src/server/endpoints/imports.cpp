@@ -1,3 +1,5 @@
+#include <optional>
+
 #include "imports.h"
 #include "system_item_import_request.h"
 #include "error_schema.h"
@@ -8,8 +10,9 @@ namespace endpoints {
 
         std::cerr << to_string(a_JSON) << std::endl;
 
+        std::optional<schemas::SystemItemImportRequest> importRequest = std::nullopt;
         try {
-            schemas::SystemItemImportRequest importRequest = schemas::SystemItemImportRequest::from_json(a_JSON);
+            importRequest.emplace(schemas::SystemItemImportRequest::from_json(a_JSON));
         } catch (json::out_of_range& e) {
             a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
             a_Response.send() << schemas::ErrorSchema(e.what(), a_Response.getStatus());
@@ -29,8 +32,14 @@ namespace endpoints {
             return;
         }
 
+        if (!importRequest->database_save(a_PGConnection)) {
+            a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
+            a_Response.send() << schemas::ErrorSchema("Failed to save to database", a_Response.getStatus());
+            return;
+        }
+
         a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-        a_Response.send() << schemas::ErrorSchema("TODO imports", a_Response.getStatus());  // TODO
+        a_Response.send() << schemas::ErrorSchema("OK", a_Response.getStatus());
     }
 
 } // namespace endpoints

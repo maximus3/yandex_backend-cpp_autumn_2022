@@ -79,5 +79,5 @@ docker-gcc-copy: ##@Build Copy conan files from docker container to host
 
 .PHONY: test
 test: ##@Testing  Runs online tests
-	python -m online_tests
-	pytest online_tests --verbosity=2 --showlocals --log-level=DEBUG
+	python -m tests
+	pytest tests --verbosity=2 --showlocals --log-level=DEBUG
