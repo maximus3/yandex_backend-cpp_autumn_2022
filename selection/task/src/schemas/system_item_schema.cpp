@@ -55,8 +55,8 @@ namespace schemas {
         // Change children FILE to None, Folder to []
         if (_type == SystemItemType::FILE) {
             _children = std::nullopt;
-        } else if (_type == SystemItemType::FOLDER) {
-            _children = _children.has_value() ? _children : std::vector<SystemItemSchema>() ;
+        } else if (_type == SystemItemType::FOLDER && !_children.has_value()) {
+            _children.emplace(std::vector<SystemItemSchema>());
         }
 
         return {
@@ -74,28 +74,56 @@ namespace schemas {
         return database::Status::DATABASE_ERROR;
     }
 
-    database::Status SystemItemSchema::database_get(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream, std::vector<SystemItemSchema>& a_ReturnVector, const std::string& a_Field, const std::string& a_Value) {
+    database::Status SystemItemSchema::database_delete(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream) {
+        const char command[] = "DELETE FROM system_item WHERE id = $1";
+        int nParams = 1;
+        const char* paramValues[] = {
+            id.c_str()
+        };
+        const int paramLengths[] = {
+            sizeof(paramValues[0])
+        };
+        const int paramFormats[] = {0};
+        int resultFormat = 0;
+        PGresult *res = PQexecParams(
+            a_PGConnection->GetConnection().get(),
+            command,
+            nParams,
+            nullptr,
+            paramValues,
+            paramLengths,
+            paramFormats,
+            resultFormat);
+        if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+            a_StatusStream << "DELETE failed: " << PQresultErrorMessage(res)
+                           << std::endl;
+            return database::Status::DATABASE_ERROR;
+        }
+        return database::Status::OK;
+    }
+
+    database::Status SystemItemSchema::database_get(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream, std::vector<SystemItemSchema>& a_ReturnVector, const std::string& a_Field, const std::string& a_Value, bool need_children) {
         const char command[] = "SELECT id, url, date, parentId, type, size FROM system_item WHERE $1 = $2;";
         int nParams = 2;
         const char* paramValues[] = {
-                a_Field.c_str(),
-                a_Value.c_str()
+            a_Field.c_str(),
+            a_Value.c_str()
         };
         const int paramLengths[] = {
-                sizeof(paramValues[0]),
-                sizeof(paramValues[1])
+            sizeof(paramValues[0]),
+            sizeof(paramValues[1])
         };
         const int paramFormats[] = {0, 0};
         int resultFormat = 0;
         PGresult *res = PQexecParams(
-                a_PGConnection->GetConnection().get(),
-                command,
-                nParams,
-                nullptr,
-                paramValues,
-                paramLengths,
-                paramFormats,
-                resultFormat);
+            a_PGConnection->GetConnection().get(),
+            command,
+            nParams,
+            nullptr,
+            paramValues,
+            paramLengths,
+            paramFormats,
+            resultFormat);
         if (PQresultStatus(res) != PGRES_TUPLES_OK) {
             a_StatusStream << "SELECT failed: " << PQresultErrorMessage(res);
             return database::Status::DATABASE_ERROR;
@@ -107,16 +135,27 @@ namespace schemas {
                 for (int j = 0; j < PQnfields(res); j++) {
                     js[PQfname(res, j)] = PQgetvalue(res, i, j);
                 }
+                if (need_children) {
+                    js["children"] = json::array();
+                    std::vector<SystemItemSchema> children;
+                    database::Status status = database_get(a_PGConnection, a_StatusStream, children, "parentId", js.at("id"), need_children=true);
+                    if (status != database::Status::OK) {
+                        return status;
+                    }
+                    for (auto& child : children) {
+                        js["children"].push_back(child.to_json());
+                    }
+                }
                 a_ReturnVector.push_back(SystemItemSchema::from_json(js));
             }
         }
 
         return database::Status::OK;
     }
-    database::Status SystemItemSchema::database_get(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream, std::optional<SystemItemSchema>& a_ReturnValue, const std::string& a_Field, const std::string& a_Value) {
+    database::Status SystemItemSchema::database_get(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream, std::optional<SystemItemSchema>& a_ReturnValue, const std::string& a_Field, const std::string& a_Value, bool need_children) {
         std::vector<SystemItemSchema> returnVector;
         a_ReturnValue = std::nullopt;
-        database::Status status = database_get(a_PGConnection, a_StatusStream, returnVector, a_Field, a_Value);
+        database::Status status = database_get(a_PGConnection, a_StatusStream, returnVector, a_Field, a_Value, need_children);
         if (status != database::Status::OK) {
             return status;
         }

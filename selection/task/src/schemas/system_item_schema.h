@@ -70,8 +70,9 @@ namespace schemas {
         static SystemItemSchema from_json(const json& j);
 
         database::Status database_save(const std::shared_ptr<PGConnection>& a_PGConnection);
-        static database::Status database_get(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream, std::vector<SystemItemSchema>& a_ReturnVector, const std::string& a_Field, const std::string& a_Value);
-        static database::Status database_get(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream, std::optional<SystemItemSchema>& a_ReturnValue, const std::string& a_Field, const std::string& a_Value);
+        database::Status database_delete(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream);
+        static database::Status database_get(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream, std::vector<SystemItemSchema>& a_ReturnVector, const std::string& a_Field, const std::string& a_Value, bool need_children = false);
+        static database::Status database_get(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream, std::optional<SystemItemSchema>& a_ReturnValue, const std::string& a_Field, const std::string& a_Value, bool need_children = false);
 
     };
 }
