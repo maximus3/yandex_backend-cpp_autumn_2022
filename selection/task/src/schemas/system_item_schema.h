@@ -45,17 +45,33 @@ namespace schemas {
                 , children(std::move(children)) {}
 
         json to_json() const override  {
+            std::cerr << __FILE__ << ":" << __LINE__ << " " << __FUNCTION__ << std::endl;
             json j;
             j["id"] = id;
-            j["url"] = url.has_value() ? url.value() : nullptr;
+            std::cerr << __FILE__ << ":" << __LINE__ << " ID OK" << std::endl;
+            if (url.has_value()) {
+                j["url"] = url.value();
+            } else {
+                j["url"] = nullptr;
+            }
+            std::cerr << __FILE__ << ":" << __LINE__ << " URL OK" << std::endl;
             j["date"] = date;
-            j["parentId"] = parentId.has_value() ? parentId.value() : nullptr;
+            std::cerr << __FILE__ << ":" << __LINE__ << " DATE OK" << std::endl;
+            if (parentId.has_value()) {
+                j["parentId"] = parentId.value();
+            } else {
+                j["parentId"] = nullptr;
+            }
+            std::cerr << __FILE__ << ":" << __LINE__ << " PARENT ID OK" << std::endl;
             j["type"] = schemas::to_string(type);
+            std::cerr << __FILE__ << ":" << __LINE__ << " TYPE OK" << std::endl;
+            std::cerr << "size: " << size.has_value() << std::endl;
             if (size.has_value()) {
                 j["size"] = size.value();
             } else {
                 j["size"] = nullptr;
             }
+            std::cerr << "size ok" << std::endl;
             if (children.has_value()) {
                 j["children"] = json::array();
                 for (const auto& child : children.value()) {
