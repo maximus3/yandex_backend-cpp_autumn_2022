@@ -12,6 +12,8 @@ namespace utils::validators {
 
     void validate_size(const std::optional<int64_t>& a_Size, const schemas::SystemItemType& a_Type);
 
+    void validate_url(const std::optional<std::string>& a_Url, const schemas::SystemItemType& a_Type);
+
 }
 
 #endif //DISK_REST_API_SCHEMAS_VALIDATORS_H

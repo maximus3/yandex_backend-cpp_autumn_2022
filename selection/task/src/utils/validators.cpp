@@ -29,4 +29,19 @@ namespace utils::validators {
         }
     }
 
+    void validate_url(const std::optional<std::string>& a_Url, const schemas::SystemItemType& a_Type) {
+        if (a_Type == schemas::SystemItemType::FILE) {
+            if (!a_Url.has_value()) {
+                throw std::invalid_argument("Url must be specified for files");
+            }
+            if (a_Url.value().size() > 255) {
+                throw std::invalid_argument("Url must be less equal than 255 characters");
+            }
+        } else {
+            if (a_Url.has_value()) {
+                throw std::invalid_argument("Url must not be specified for directories");
+            }
+        }
+    }
+
 }

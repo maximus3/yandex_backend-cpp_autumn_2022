@@ -16,6 +16,8 @@ namespace schemas {
                 return "FILE";
             case SystemItemType::FOLDER:
                 return "FOLDER";
+            default:
+                throw std::runtime_error("Unknown SystemItemType");
         }
     }
 

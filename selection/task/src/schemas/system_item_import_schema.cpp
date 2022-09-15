@@ -38,8 +38,8 @@ namespace schemas {
             _size = std::nullopt;
         }
 
+        utils::validators::validate_url(_url, _type);
         utils::validators::validate_size(_size, _type);
-        // TODO: validate
 
         return {
                 std::move(_id),

@@ -13,6 +13,7 @@ using json = nlohmann::json;
 #include "base_schema.h"
 #include "system_item_type.h"
 #include "pg_connection.h"
+#include "status.h"
 
 namespace schemas {
 
@@ -68,8 +69,9 @@ namespace schemas {
 
         static SystemItemSchema from_json(const json& j);
 
-        bool database_save(std::shared_ptr<PGConnection>& a_PGConnection) const;
-        std::vector<SystemItemSchema> database_get(std::shared_ptr<PGConnection>& a_PGConnection, const std::string& field, const std::string& value) const;
+        database::Status database_save(const std::shared_ptr<PGConnection>& a_PGConnection);
+        static database::Status database_get(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream, std::vector<SystemItemSchema>& a_ReturnVector, const std::string& a_Field, const std::string& a_Value);
+        static database::Status database_get(const std::shared_ptr<PGConnection>& a_PGConnection, std::stringstream& a_StatusStream, std::optional<SystemItemSchema>& a_ReturnValue, const std::string& a_Field, const std::string& a_Value);
 
     };
 }
