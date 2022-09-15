@@ -47,21 +47,25 @@ namespace schemas {
         json to_json() const override  {
             json j;
             j["id"] = id;
-            if (url.has_value()) {
-                j["url"] = url.value();
-            }
+            j["url"] = url.has_value() ? url.value() : nullptr;
             j["date"] = date;
-            if (parentId.has_value()) {
-                j["parentId"] = parentId.value();
-            }
-            j["type"] = type;
+            j["parentId"] = parentId.has_value() ? parentId.value() : nullptr;
+            j["type"] = schemas::to_string(type);
             if (size.has_value()) {
                 j["size"] = size.value();
+            } else {
+                j["size"] = nullptr;
             }
             if (children.has_value()) {
                 j["children"] = json::array();
-                for (auto& child : children.value()) {
+                for (const auto& child : children.value()) {
                     j["children"].push_back(child.to_json());
+                }
+            } else {
+                if (type == SystemItemType::FOLDER) {
+                    j["children"] = json::array();
+                } else {
+                    j["children"] = nullptr;
                 }
             }
             return j;

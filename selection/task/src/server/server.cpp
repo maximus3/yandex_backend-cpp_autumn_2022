@@ -99,25 +99,32 @@ public:
         std::string content_type = a_Request.getContentType();
 
         std::optional<json> json_data;
-        if ( content_type == "application/json" ) {
+        if (content_type == "application/json") {
             try {
                 json_data = json::parse(a_Request.stream());
             }
-            catch(json::parse_error& exception) {
+            catch (json::parse_error &exception) {
                 // Make sure everything is read, otherwise this can result
                 // in Bad Request error in the next call.
                 Poco::NullOutputStream nos;
                 Poco::StreamCopier::copyStream(a_Request.stream(), nos);
 
                 a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
-                a_Response.send() << schemas::ErrorSchema(&"JSON error occurred: " [ *exception.what()], a_Response.getStatus());
+                a_Response.send()
+                        << schemas::ErrorSchema(&"JSON error occurred: "[*exception.what()], a_Response.getStatus());
                 a_Response.send().flush();
                 return;
             }
         }
 
         m_PGConnection = m_PGBackend->connection();
-        handler(a_Request, a_Response, json_data);
+        try {
+            handler(a_Request, a_Response, json_data);
+        } catch (std::exception& exception) {
+            a_Response.setStatus(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
+            a_Response.send() << schemas::ErrorSchema(&"Internal server error: "[*exception.what()], a_Response.getStatus());
+            a_Response.send().flush();
+        }
         m_PGBackend->freeConnection(m_PGConnection);
 
         a_Response.send().flush();

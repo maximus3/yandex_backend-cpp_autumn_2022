@@ -37,15 +37,13 @@ namespace schemas {
         json to_json() const override {
             json j;
             j["id"] = id;
-            if (url.has_value()) {
-                j["url"] = url.value();
-            }
-            if (parentId.has_value()) {
-                j["parentId"] = parentId.value();
-            }
-            j["type"] = type;
+            j["url"] = url.has_value() ? url.value() : nullptr;
+            j["parentId"] = parentId.has_value() ? parentId.value() : nullptr;
+            j["type"] = schemas::to_string(type);
             if (size.has_value()) {
                 j["size"] = size.value();
+            } else {
+                j["size"] = nullptr;
             }
             return j;
         }

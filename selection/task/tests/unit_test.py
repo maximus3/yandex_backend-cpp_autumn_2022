@@ -181,7 +181,13 @@ def request(path, method="GET", data=None, json_response=False):
         with urllib.request.urlopen(req) as res:
             res_data = res.read().decode("utf-8")
             if json_response:
-                res_data = json.loads(res_data)
+                try:
+                    res_data_json = json.loads(res_data)
+                    res_data = res_data_json
+                except json.JSONDecodeError:
+                    print("JSONDecodeError")
+                    print(res_data)
+                    raise
             return res.getcode(), res_data
     except urllib.error.HTTPError as e:
         return e.getcode(), e.read().decode("utf-8")

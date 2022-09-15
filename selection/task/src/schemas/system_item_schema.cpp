@@ -37,7 +37,9 @@ namespace schemas {
 
         std::optional<int64_t> _size;
         if (j.contains("size") && !j.at("size").is_null()) {
+            //std::cerr << __FILE__ << __LINE__ << ": size: " << j.at("size") << std::endl;
             _size = j.at("size").get<int64_t>();
+            //std::cerr << __FILE__ << __LINE__ << ": size: " << _size.value() << std::endl;
         } else {
             _size = std::nullopt;
         }
@@ -131,23 +133,27 @@ namespace schemas {
             a_StatusStream << "SELECT failed: " << PQresultErrorMessage(res);
             return database::Status::DATABASE_ERROR;
         } else {
-            std::cerr << "Get " << PQntuples(res) << " tuples, each tuple has "
-                      << PQnfields(res) << " fields" << std::endl;
+            // std::cerr << "Get " << PQntuples(res) << " tuples, each tuple has "
+            //           << PQnfields(res) << " fields" << std::endl;
             for (int i = 0; i < PQntuples(res); i++) {
-                std::cerr << "Tuple " << i << std::endl;
+                // std::cerr << "Tuple " << i << std::endl;
                 json js;
                 for (int j = 0; j < PQnfields(res); j++) {
-                    if ( PQgetisnull(res, i, j)) {
+                    if (PQgetisnull(res, i, j)) {
                         continue;
                     }
                     auto column_name = strcmp(PQfname(res, j), "parentid") ? PQfname(res, j): "parentId";
                     auto column_value = PQgetvalue(res, i, j);
                     js[column_name] = column_value;
+                    if (strcmp(column_name, "size") == 0) {
+                        std::cerr << __FILE__ << " " << __LINE__ << ": size: " << column_value << std::endl;
+                        js[column_name] = std::stoll(column_value);
+                    }
                 }
-                std::cerr << "JSON: " << js.dump() << std::endl;
+                //std::cerr << "JSON: " << js.dump() << std::endl;
                 js["children"] = nullptr;
                 if (need_children) {
-                    std::cerr << "Need children" << std::endl;
+                    // std::cerr << "Need children" << std::endl;
                     js["children"] = json::array();
                     std::vector<SystemItemSchema> children;
                     database::Status status = database_get(a_PGConnection, a_StatusStream, children, "parentId",
@@ -159,11 +165,11 @@ namespace schemas {
                         js["children"].push_back(child.to_json());
                     }
                 }
-                std::cerr << "Children done" << std::endl;
+                // std::cerr << "Children done" << std::endl;
                 a_ReturnVector.push_back(SystemItemSchema::from_json(js));
-                std::cerr << "Tuple " << i << " done" << std::endl;
+                // std::cerr << "Tuple " << i << " done" << std::endl;
             }
-            std::cerr << "Size of a_ReturnVector: " << a_ReturnVector.size() << std::endl;
+            // std::cerr << "Size of a_ReturnVector: " << a_ReturnVector.size() << std::endl;
         }
         return database::Status::OK;
     }

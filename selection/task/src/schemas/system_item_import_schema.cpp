@@ -1,3 +1,4 @@
+#include <iostream>
 #include "system_item_import_schema.h"
 #include "validators.h"
 
@@ -33,7 +34,9 @@ namespace schemas {
 
         std::optional<int64_t> _size;
         if (j.contains("size") && !j.at("size").is_null()) {
+            //std::cerr << __FILE__ << __LINE__ << ": size: " << j.at("size") << std::endl;
             _size = j.at("size").get<int64_t>();
+            //std::cerr << __FILE__ << __LINE__ << ": size: " << _size.value() << std::endl;
         } else {
             _size = std::nullopt;
         }

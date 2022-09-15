@@ -1,5 +1,6 @@
 #include <iostream>
 #include <set>
+#include <string>
 
 #include "system_item_import_request.h"
 #include "system_item_schema.h"
@@ -82,6 +83,10 @@ namespace schemas {
                 PQexec(a_PGConnection->GetConnection().get(), "ROLLBACK");
                 return _status;
             }
+            std::stringstream size_stream;
+            if (item.size.has_value()) {
+                size_stream << item.size.value();
+            }
             if (_item.has_value()) {
                 // UPDATE
 
@@ -92,13 +97,14 @@ namespace schemas {
                     return database::Status::VALIDATION_ERROR;
                 }
 
-                int nParams = 5;
-                std:: string sql = R"(UPDATE system_item SET url = CASE WHEN $1='' THEN NULL ELSE $1::VARCHAR END, date = $2::VARCHAR, dt_date = TO_TIMESTAMP($2, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), parentId = CASE WHEN $3='' THEN NULL ELSE $3 END, size = CASE WHEN $4='' THEN NULL ELSE $4::BIGINT END WHERE id = $5;)";
+                int nParams = 6;
+                std:: string sql = R"(UPDATE system_item SET url = CASE WHEN $1='' THEN NULL ELSE $1::VARCHAR END, date = $2::VARCHAR, dt_date = TO_TIMESTAMP($2, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), parentId = CASE WHEN $3='' THEN NULL ELSE $3 END, type=$4, size = CASE WHEN $5='' THEN NULL ELSE $5::BIGINT END WHERE id = $6;)";
                 const char* paramValues[] = {
                         item.url.has_value() ? item.url.value().c_str() : "",
                         updateDate.c_str(),
                         item.parentId.has_value() ? item.parentId.value().c_str() : "",
-                        item.size.has_value() ? std::to_string(item.size.value()).c_str() : "",
+                        schemas::to_string(item.type).c_str(),
+                        size_stream.str().c_str(),
                         item.id.c_str()
                 };
                 const int paramLengths[] = {
@@ -106,9 +112,10 @@ namespace schemas {
                         sizeof(paramValues[1],
                             sizeof(paramValues[2]),
                             sizeof(paramValues[3]),
-                            sizeof(paramValues[4])
+                            sizeof(paramValues[4]),
+                            sizeof(paramValues[5])
                         )};
-                const int paramFormats[] = {0, 0, 0, 0, 0};
+                const int paramFormats[] = {0, 0, 0, 0, 0, 0};
                 int resultFormat = 0;
                 PGresult *res = PQexecParams(
                         a_PGConnection->GetConnection().get(),
@@ -128,14 +135,31 @@ namespace schemas {
             } else {
                 // CREATE
                 int nParams = 6;
-                std:: string sql = R"(INSERT INTO system_item (id, url, date, dt_date, parentId, type, size) VALUES ( $1::VARCHAR, CASE WHEN $2='' THEN NULL ELSE $2::VARCHAR END, $3::VARCHAR, TO_TIMESTAMP($3, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), CASE WHEN $4='' THEN NULL ELSE $4 END, $5::VARCHAR, CASE WHEN $6='' THEN NULL ELSE $6::BIGINT END );)";
+                std:: string sql = R"(INSERT INTO system_item (
+                        id,
+                        url,
+                        date,
+                        dt_date,
+                        parentId,
+                        size,
+                        type
+                    ) VALUES (
+                        $1::VARCHAR,
+                        CASE WHEN $2='' THEN NULL ELSE $2::VARCHAR END,
+                        $3::VARCHAR,
+                        TO_TIMESTAMP($3, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+                        CASE WHEN $4='' THEN NULL ELSE $4 END,
+                        CASE WHEN $5='' THEN NULL ELSE $5::BIGINT END,
+                        $6::VARCHAR
+                         );)";
+                //std::cerr << "Inserting " << item.to_string() << std::endl;
                 const char* paramValues[] = {
                         item.id.c_str(),
                         item.url.has_value() ? item.url.value().c_str() : "",
                         updateDate.c_str(),
                         item.parentId.has_value() ? item.parentId.value().c_str() : "",
-                        schemas::to_string(item.type).c_str(),
-                        item.size.has_value() ? std::to_string(item.size.value()).c_str() : ""
+                        size_stream.str().c_str(),
+                        schemas::to_string(item.type).c_str()
                 };
                 const int paramLengths[] = {
                         sizeof(paramValues[0]),
@@ -147,6 +171,8 @@ namespace schemas {
                         )};
                 const int paramFormats[] = {0, 0, 0, 0, 0, 0};
                 int resultFormat = 0;
+                //std::cerr << "Executing " << sql << std::endl;
+                //std::cerr << "Params: " << paramValues[0] << ", " << paramValues[1] << ", " << paramValues[2] << ", " << paramValues[3] << ", " << paramValues[4] << ", " << paramValues[5] << std::endl;
                 PGresult *res = PQexecParams(
                         a_PGConnection->GetConnection().get(),
                         sql.c_str(),
