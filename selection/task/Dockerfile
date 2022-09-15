@@ -3,7 +3,7 @@ FROM conanio/gcc9:latest
 COPY ./src app
 # Specify the working directory
 WORKDIR app
-EXPOSE 8000
+EXPOSE 80
 USER root
 RUN chmod 777 -R /home/conan/app
 USER conan

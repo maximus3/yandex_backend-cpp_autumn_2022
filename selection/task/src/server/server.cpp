@@ -153,7 +153,7 @@ int App::main(const std::vector<std::string> &)
 
     auto pg_backend = std::make_shared<PGBackend>();
 
-    Poco::Net::HTTPServer s(new RequestHandlerFactory(pg_backend), Poco::Net::ServerSocket(8000), pParams);
+    Poco::Net::HTTPServer s(new RequestHandlerFactory(pg_backend), Poco::Net::ServerSocket(80), pParams);
 
     s.start();
     std::cerr << "Server started" << std::endl;
