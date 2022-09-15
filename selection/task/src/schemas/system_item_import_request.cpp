@@ -57,7 +57,7 @@ namespace schemas {
             // Check if parent is FOLDER
             if (item.parentId.has_value()) {
                 std::optional<SystemItemSchema> _parent;
-                auto _status = SystemItemSchema::database_get(a_PGConnection, a_StatusStream, _parent, "id", item.parentId.value());
+                _status = SystemItemSchema::database_get(a_PGConnection, a_StatusStream, _parent, "id", item.parentId.value());
                 if (_status != database::Status::OK) {
                     PQexec(a_PGConnection->GetConnection().get(), "ROLLBACK");
                     return _status;
@@ -77,7 +77,7 @@ namespace schemas {
 
             // Check if item already in database
             std::optional<SystemItemSchema> _item;
-            auto _status = SystemItemSchema::database_get(a_PGConnection, a_StatusStream, _item, "id", item.id);
+            _status = SystemItemSchema::database_get(a_PGConnection, a_StatusStream, _item, "id", item.id);
             if (_status != database::Status::OK) {
                 PQexec(a_PGConnection->GetConnection().get(), "ROLLBACK");
                 return _status;
@@ -93,7 +93,7 @@ namespace schemas {
                 }
 
                 int nParams = 5;
-                std:: string sql = R"(UPDATE system_item SET url = CASE WHEN $1='' THEN NULL ELSE $1::VARCHAR END, date = $2::VARCHAR, dt_date = TO_TIMESTAMP($2, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), parentId = CASE WHEN $3='' THEN NULL ELSE $3 END, size = CASE WHEN $4='' THEN NULL ELSE $4::BIGINT END) WHERE id = $5;)";
+                std:: string sql = R"(UPDATE system_item SET url = CASE WHEN $1='' THEN NULL ELSE $1::VARCHAR END, date = $2::VARCHAR, dt_date = TO_TIMESTAMP($2, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), parentId = CASE WHEN $3='' THEN NULL ELSE $3 END, size = CASE WHEN $4='' THEN NULL ELSE $4::BIGINT END WHERE id = $5;)";
                 const char* paramValues[] = {
                         item.url.has_value() ? item.url.value().c_str() : "",
                         updateDate.c_str(),
