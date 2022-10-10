@@ -1,3 +1,6 @@
 [submodule "selection/task"]
 	path = selection/task
 	url = git@github.com:maximus3/yandex_backend-selection-cpp_autumn_2022.git
+[submodule "homeworks/homework_01/third_party/userver"]
+	path = homeworks/homework_01/third_party/userver
+	url = https://github.com/userver-framework/userver.git
