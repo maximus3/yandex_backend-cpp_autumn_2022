@@ -7,3 +7,6 @@
 [submodule "homeworks/homework_03/third_party/userver"]
 	path = homeworks/homework_03/third_party/userver
 	url = https://github.com/userver-framework/userver.git
+[submodule "homeworks/homework_05/third_party/userver"]
+	path = homeworks/homework_05/third_party/userver
+	url = https://github.com/userver-framework/userver.git
