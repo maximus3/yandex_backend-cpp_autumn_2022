@@ -1,0 +1,4 @@
+[Host: some.host]
+[Content-Type: application/json]
+48 /bubble
+{"numbers": [10, 8, 7, 13, 25, 64, 85, 91, 70]}
