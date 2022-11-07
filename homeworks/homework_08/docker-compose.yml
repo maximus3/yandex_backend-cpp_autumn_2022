@@ -1,0 +1,14 @@
+version: "3.2"
+services:
+  balancer:
+    // paste your solution here
+
+  tokenizer:
+    image: harand/tokenizer
+    ports:
+      - "7000:8000"
+
+  tokenizer_replica:
+    image: harand/tokenizer
+    ports:
+      - "9000:8000"
